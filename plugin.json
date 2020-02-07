@@ -1,0 +1,24 @@
+{
+    "name": "LocationProviderDBIPApi",
+    "description": "Let's you geolocate visitors using the db-ip.com API",
+    "version": "0.0.1",
+    "require": {
+        "matomo": ">=4.0.0-b1,<5.0.0-b1"
+    },
+    "authors": [
+        {
+            "name": "Stefan Giehl",
+            "email": "stefan@matomo.org",
+            "homepage": "https://matomo.org"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/piwik/plugin-CustomAlerts/issues",
+        "forum": "https://forum.piwik.org",
+        "source": "https://github.com/piwik/plugin-CustomAlerts",
+        "wiki": "https://github.com/piwik/plugin-CustomAlerts/wiki"
+    },
+    "license": "GPL v3+",
+    "keywords": ["alerts", "notification", "report", "monitoring"],
+    "homepage": "https://matomo.org"
+}
