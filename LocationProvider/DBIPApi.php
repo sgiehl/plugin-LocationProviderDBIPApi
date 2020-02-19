@@ -8,9 +8,12 @@
  */
 namespace Piwik\Plugins\LocationProviderDBIPApi\LocationProvider;
 
+use Piwik\Common;
 use Piwik\Piwik;
+use Piwik\Plugins\GeoIp2\LocationProvider\GeoIp2;
 use Piwik\Plugins\LocationProviderDBIPApi\SystemSettings;
 use Piwik\Plugins\UserCountry\LocationProvider;
+use Piwik\Url;
 
 include_once PIWIK_INCLUDE_PATH . '/plugins/LocationProviderDBIPApi/lib/dbip-client.class.php';
 
@@ -72,7 +75,36 @@ class DBIPApi extends LocationProvider
             $result[self::ORG_KEY] = $addrInfo->organization;
         }
 
+        if (property_exists($addrInfo, 'stateProv')) {
+            $result[self::REGION_NAME_KEY] = $addrInfo->stateProv;
+            $result[self::REGION_CODE_KEY] = $this->determineRegionIsoCodeByNameAndCountryCode($addrInfo->stateProv, $addrInfo->countryCode);
+        }
+
         return $result;
+    }
+
+    /**
+     * Try to determine the ISO region code based on the region name and country code
+     *
+     * @param string $regionName
+     * @param string $countryCode
+     * @return string
+     */
+    protected function determineRegionIsoCodeByNameAndCountryCode($regionName, $countryCode)
+    {
+        $regionNames = GeoIp2::getRegionNames();
+
+        if (empty($regionNames[$countryCode])) {
+            return '';
+        }
+
+        foreach ($regionNames[$countryCode] as $isoCode => $name) {
+            if (Common::mb_strtolower($name) === Common::mb_strtolower($regionName)) {
+                return $isoCode;
+            }
+        }
+
+        return '';
     }
 
     /**
@@ -120,11 +152,42 @@ class DBIPApi extends LocationProvider
     {
         $desc = $extraMessage = $installDocs = '';
 
+        $apiKey = $this->getApiKey();
+
+        if (!empty($apiKey)) {
+            \DBIP\APIKey::set($apiKey);
+        }
+
+        $info = \DBIP\APIKey::info();
+
+        $desc .= Piwik::translate('LocationProviderDBIPApi_ProviderDescription', [
+            '<a rel="noreferrer"  target="_blank" href="https://db-ip.com/?refid=mtm">', '</a>'
+        ]);
+        $desc .= '<br>' . Piwik::translate('LocationProviderDBIPApi_EnsureLimitMatches');
+
+
+        if (empty($apiKey)) {
+            $configUrl = Url::getCurrentQueryStringWithParametersModified(array(
+                'module' => 'CoreAdminHome', 'action' => 'generalSettings'
+            ));
+
+            $desc .= '<br><br>' . Piwik::translate('LocationProviderDBIPApi_QueriesLeftToday', $info->queriesLeft);
+            $desc .= '<br><br>' . Piwik::translate('LocationProviderDBIPApi_SetAPIKey', [
+                '<a href="' . $configUrl . '">', '</a>'
+            ]);
+        } else {
+            $desc .= '<br><br>' . Piwik::translate('LocationProviderDBIPApi_QuotaLeftToday', [$info->queriesLeft, $info->queriesPerDay]);
+        }
+
         $availableInfo = $this->getSupportedLocationInfo();
         $availableDatabaseTypes = [];
 
         if (isset($availableInfo[self::CITY_NAME_KEY]) && $availableInfo[self::CITY_NAME_KEY]) {
             $availableDatabaseTypes[] = Piwik::translate('UserCountry_City');
+        }
+
+        if (isset($availableInfo[self::REGION_CODE_KEY]) && $availableInfo[self::REGION_CODE_KEY]) {
+            $availableDatabaseTypes[] = Piwik::translate('UserCountry_Region');
         }
 
         if (isset($availableInfo[self::COUNTRY_NAME_KEY]) && $availableInfo[self::COUNTRY_NAME_KEY]) {
@@ -136,10 +199,11 @@ class DBIPApi extends LocationProvider
         }
 
         if (!empty($availableDatabaseTypes)) {
-            $extraMessage = '<strong>' . Piwik::translate('General_Note') . '</strong>:&nbsp;'
-                . Piwik::translate('GeoIp2_GeoIPImplHasAccessTo') . ':&nbsp;<strong>'
+            $extraMessage .= '<strong>' . Piwik::translate('General_Note') . '</strong>:&nbsp;'
+                . Piwik::translate('LocationProviderDBIPApi_ImplHasAccessTo') . ':&nbsp;<strong>'
                 . implode(', ', $availableDatabaseTypes) . '</strong>.';
         }
+
 
         return [
             'id'            => self::ID,
@@ -178,9 +242,12 @@ class DBIPApi extends LocationProvider
         $result[self::CONTINENT_NAME_KEY] = true;
         $result[self::COUNTRY_CODE_KEY] = true;
         $result[self::COUNTRY_NAME_KEY] = true;
-        $result[self::REGION_CODE_KEY] = false;
-        $result[self::REGION_NAME_KEY] = false;
         $result[self::CITY_NAME_KEY] = true;
+
+        if (property_exists($addrInfo, 'stateProv')) {
+            $result[self::REGION_CODE_KEY] = true;
+            $result[self::REGION_NAME_KEY] = true;
+        }
 
         if (property_exists($addrInfo, 'longitude')) {
             $result[self::LATITUDE_KEY] = true;

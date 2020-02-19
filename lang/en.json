@@ -1,6 +1,12 @@
 {
   "LocationProviderDBIPApi": {
     "ConfigureApiAccess": "Configure API access for db-ip.com",
-    "ApiKey": "API Key"
+    "ApiKey": "API Key",
+    "ProviderDescription": "This provider geolocates your visitor by gathering location information using the %1$sdp-ip.com API%2$s",
+    "EnsureLimitMatches": "Before using this provider please ensure that the daily quota enabled for your license key is greater than your daily number of visitors.",
+    "SetAPIKey": "You are using the free API access. You can set your %1$sAPI key here%2$s.",
+    "QuotaLeftToday": "You have %1$s requests left today from your daily quota of %2$s",
+    "ImplHasAccessTo": "This provider has access to the following information",
+    "QueriesLeftToday": "%1$s queries left today"
   }
 }
