@@ -8,11 +8,11 @@ This plugin let's you geolocate visitors using the db-ip.com API. By default thi
 
 ### Requirements
 
-[Matomo](https://github.com/matomo-org/matomo) 4.0.0-b1 or higher is required.
+[Matomo](https://github.com/matomo-org/matomo) 3.12.0 or higher is required.
 
 ## Changelog
 
-- Version 4.0.0 - Initial Release
+- Version 3.0.0 - Matomo 3.x Backport
 
 ## Support
 

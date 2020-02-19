@@ -1,9 +1,9 @@
 {
     "name": "LocationProviderDBIPApi",
     "description": "Let's you geolocate visitors using the db-ip.com API",
-    "version": "4.0.0",
+    "version": "3.0.0",
     "require": {
-        "matomo": ">=4.0.0-b1,<5.0.0-b1"
+        "matomo": ">=3.12.0,<4.0.0-b1"
     },
     "authors": [
         {
